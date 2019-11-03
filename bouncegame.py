@@ -4,8 +4,9 @@ import time
 
 
 class Ball:
-    def __init__(self, canvas, color):
+    def __init__(self, canvas, paddle, color):
         self.canvas = canvas
+        self.paddle = paddle
         self.id = canvas.create_oval(10, 10, 25, 25, fill=color)
         self.canvas.move(self.id, 245, 100)
         starts = [-3, -2, -1, 1, 2, 3]
@@ -14,6 +15,14 @@ class Ball:
         self.y = -3
         self.canvas_height = self.canvas.winfo_height()
         self.canvas_width = self.canvas.winfo_width()
+        self.hit_bottom = False
+
+    def hit_paddle(self, pos):
+        paddle_pos = self.canvas.coords(self.paddle.id)
+        if pos [2] >= paddle_pos[0] and pos [0] <= paddle_pos[2]:
+            if pos[3] >= paddle_pos[1] and pos[3] <= paddle_pos[3]:
+                return True
+        return False
 
     def draw(self):
         self.canvas.move(self.id, self.x, self.y)
@@ -21,7 +30,9 @@ class Ball:
         if pos[1] <= 0:
             self.y = 1
         if pos[3] >= self.canvas_height:
-            self.y = -1
+            self.hit_bottom = True
+        if self.hit_paddle(pos) == True:
+            self.y = -3
         if pos[0] <= 0:
             self.x = 3
         if pos[2] >= self.canvas_width:
@@ -64,10 +75,14 @@ canvas.pack()
 tk.update()
 
 paddle = Paddle(canvas, 'blue')
-ball = Ball(canvas, 'red')
+ball = Ball(canvas, paddle, 'red')
 
 while 1:
+    if ball.hit_bottom == False:
+        ball.draw()
+        paddle.draw()
     ball.draw()
+    paddle.draw()
     tk.update_idletasks()
     tk.update()
     time.sleep(0.01)
